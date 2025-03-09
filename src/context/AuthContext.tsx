@@ -4,26 +4,25 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import { useRouter } from "next/navigation";
 
 interface AuthContextType {
-  user: { email: string; role: string } | null;
-  login: (userData: { email: string; role: string }) => void;
+  user: { email: string; role: string; token: string } | null;
+  login: (userData: { email: string; role: string; token: string }) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<{ email: string; role: string } | null>(null);
+  const [user, setUser] = useState<{ email: string; role: string; token: string } | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    // Load user from localStorage on mount
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
   }, []);
 
-  const login = (userData: { email: string; role: string }) => {
+  const login = (userData: { email: string; role: string; token: string }) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
     router.push("/");

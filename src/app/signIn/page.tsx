@@ -24,13 +24,20 @@ export default function SignIn() {
     setLoading(true);
     try {
       // const response = await axios.post("http://localhost:5000/api/auth/login", values);
-
-      // const userData = { email: response.data.email, role: response.data.role };
-      const userData = {
-        email: 'himadrinayak2702@gmail.com',
-        role: ROLE.ADMIN
+      const response = {
+        data: {
+          email: 'hima@gmail.com',
+          role: ROLE.ADMIN,
+          token: 'token'
+        }
       }
-      login(userData); // Store user in context
+      const userData = { 
+        email: response.data.email , 
+        role: response.data.role  , 
+        token: response.data.token
+      };
+      
+      login(userData);
       toast.success("Login successful!");
     } catch (error) {
       toast.error("Invalid credentials");
