@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useFormik } from "formik";
+import axios from "axios";
 import * as Yup from "yup";
 import {
   Button,
@@ -12,46 +13,40 @@ import {
   TextField,
   MenuItem,
 } from "@mui/material";
+import { ROLE } from "@/constants/role.constants";
+import { useAuth } from "@/context/AuthContext";
+import Swal from "sweetalert2";
 
-const roles = ["Admin", "Editor", "Viewer"];
+const roles = [ROLE.ADMIN, ROLE.EMPLOYEE, ROLE.MANAGER];
 
 interface User {
   id: string;
   name: string;
   email: string;
-  phone: string;
   role: string;
 }
 
 interface UserCreationDialogProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (values: {
-    id?: string;
-    name: string;
-    email: string;
-    password?: string;
-    phone: string;
-    role: string;
-  }) => void;
-  initialData?: User | null; // Null when creating a new user
+  initialData?: User | null;
 }
 
 const UserCreationDialog: React.FC<UserCreationDialogProps> = ({
   open,
   onClose,
-  onSubmit,
   initialData,
 }) => {
+  const { user, authConfig } = useAuth();
   const isEditing = Boolean(initialData);
-
+  const isAdmin = user?.role === ROLE.ADMIN;
+  const BASE_URL = process.env.NEXT_PUBLIC_URL;
   const formik = useFormik({
-    enableReinitialize: true, // Ensure form updates when initialData changes
+    enableReinitialize: true,
     initialValues: {
       name: initialData?.name || "",
       email: initialData?.email || "",
       password: "",
-      phone: initialData?.phone || "",
       role: initialData?.role || "",
     },
     validationSchema: Yup.object({
@@ -61,17 +56,54 @@ const UserCreationDialog: React.FC<UserCreationDialogProps> = ({
         .min(6, "Password must be at least 6 characters")
         .when([], {
           is: () => !isEditing,
-          then: (schema) => schema.required("Password is required when creating a new user"),
+          then: (schema) => schema.required("Password is required"),
         }),
-      phone: Yup.string().matches(/^\d{10}$/, "Phone number must be 10 digits").required("Phone number is required"),
       role: Yup.string().required("Role is required"),
     }),
-    onSubmit: (values) => {
-      onSubmit(isEditing ? { ...values, id: initialData?.id } : values);
-      onClose();
+    onSubmit: async (values, { setSubmitting, setErrors }) => {
+      if (!isAdmin) {
+        setErrors({ role: "Only admins can perform this action." });
+        return;
+      }
+      try {
+        const API_BASE_URL = `${BASE_URL}/api/users`;
+        let response;
+
+        if (isEditing) {
+          response = await axios.put(`${API_BASE_URL}/${initialData?.id}`, values, authConfig);
+          Swal.fire({
+            icon: "success",
+            title: "User Updated",
+            text: `User ${values.name} has been successfully updated!`,
+            confirmButtonColor: "#4CAF50",
+          });
+        } else {
+          response = await axios.post(API_BASE_URL, values, authConfig);
+          Swal.fire({
+            icon: "success",
+            title: "User Created",
+            text: `User ${values.name} has been successfully created!`,
+            confirmButtonColor: "#4CAF50",
+          });
+        }
+        onClose();
+      } catch (error) {
+        console.error("Error submitting user data:", error);
+        Swal.fire({
+          title: "Error!",
+          text: "Something went wrong. Please try again.",
+          icon: "error",
+          confirmButtonColor: "#d33",
+          confirmButtonText: "OK",
+        });
+      } finally {
+        setSubmitting(false);
+        onClose();
+      }
+
     },
   });
-  console.log(initialData);
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>{isEditing ? "Edit User" : "Create User"}</DialogTitle>
@@ -99,7 +131,7 @@ const UserCreationDialog: React.FC<UserCreationDialogProps> = ({
             error={formik.touched.email && Boolean(formik.errors.email)}
             helperText={formik.touched.email && formik.errors.email}
             margin="dense"
-            disabled={isEditing} // Prevent email change when editing
+            disabled={isEditing}
           />
           {!isEditing && (
             <TextField
@@ -115,17 +147,6 @@ const UserCreationDialog: React.FC<UserCreationDialogProps> = ({
               margin="dense"
             />
           )}
-          <TextField
-            fullWidth
-            label="Phone Number"
-            name="phone"
-            value={formik.values.phone}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            error={formik.touched.phone && Boolean(formik.errors.phone)}
-            helperText={formik.touched.phone && formik.errors.phone}
-            margin="dense"
-          />
           <TextField
             fullWidth
             select
@@ -149,7 +170,7 @@ const UserCreationDialog: React.FC<UserCreationDialogProps> = ({
           <Button onClick={onClose} color="secondary">
             Cancel
           </Button>
-          <Button type="submit" variant="contained" color="primary">
+          <Button type="submit" variant="contained" color="primary" disabled={!isAdmin}>
             {isEditing ? "Update" : "Create"}
           </Button>
         </DialogActions>

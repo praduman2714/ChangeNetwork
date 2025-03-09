@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { Button, useMediaQuery } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from "@mui/material";
 import { Add, Edit, Receipt } from "@mui/icons-material";
 import UserCreationDialog from "./UserCreationDialog";
 import axios from "axios";
@@ -22,28 +21,19 @@ type UserListProps = {
 };
 
 const UserList = ({ users, onDelete }: UserListProps) => {
+  console.log("users ", users);
   const router = useRouter();
-  const isMobile = useMediaQuery("(max-width:600px)");
-
-  const [pageSize, setPageSize] = useState(8);
   const [open, setOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    if (![8, 20, 50].includes(pageSize)) {
-      setPageSize(8);
-    }
-  }, [pageSize]);
 
   const handleOpenEditDialog = (user: User) => {
     setEditingUser(user);
     setOpen(true);
   };
 
-  async function handleCreateUser(values: { name: string; email: string; password?: string; phone?: string; role: string; id?: string }): Promise<void> {
+  async function handleCreateUser(values: { name: string; email: string; password?: string; role: string; id?: string }): Promise<void> {
     try {
       if (values.id) {
-        // Update existing user
         await axios.put(`/api/users/${values.id}`, values);
         Swal.fire({
           icon: "success",
@@ -52,7 +42,6 @@ const UserList = ({ users, onDelete }: UserListProps) => {
           confirmButtonColor: "#4CAF50",
         });
       } else {
-        // Create new user
         await axios.post("/api/users", values);
         Swal.fire({
           icon: "success",
@@ -61,8 +50,6 @@ const UserList = ({ users, onDelete }: UserListProps) => {
           confirmButtonColor: "#4CAF50",
         });
       }
-
-      console.log("User operation successful:", values);
       setOpen(false);
       setEditingUser(null);
     } catch (error) {
@@ -76,31 +63,13 @@ const UserList = ({ users, onDelete }: UserListProps) => {
     }
   }
 
-  const columns: GridColDef[] = [
-    { field: "id", headerName: "ID", width: isMobile ? 80 : 150 },
-    { field: "name", headerName: "Name", width: isMobile ? 120 : 200 },
-    { field: "email", headerName: "Email", width: isMobile ? 180 : 250 },
-    { field: "role", headerName: "Role", width: isMobile ? 100 : 180 },
-    {
-      field: "actions",
-      headerName: "Actions",
-      width: isMobile ? 150 : 200,
-      renderCell: (params) => (
-        <div className="flex space-x-2">
-          <Button variant="contained" color="primary" size="small" startIcon={<Edit />} onClick={() => handleOpenEditDialog(params.row)}>
-            Edit
-          </Button>
-          <Button variant="contained" color="secondary" size="small" onClick={() => onDelete(params.row.id)}>
-            Delete
-          </Button>
-        </div>
-      ),
-    },
-  ];
-
   return (
     <>
-      <UserCreationDialog open={open} onClose={() => setOpen(false)} onSubmit={handleCreateUser} initialData={editingUser} />
+      <UserCreationDialog 
+        open={open}
+        onClose={() => setOpen(false)}
+        initialData={editingUser}
+      />
       <section className="mx-10 p-2">
         <div className="mx-2 my-5 flex justify-between items-center mt-5">
           <div className="flex items-center space-x-2 text-lg font-semibold">
@@ -121,24 +90,37 @@ const UserList = ({ users, onDelete }: UserListProps) => {
           </Button>
         </div>
 
-        <div className="w-full" style={{ height: 500, backgroundColor: "#fff", borderRadius: "8px" }}>
-          <DataGrid
-            rows={users}
-            columns={columns}
-            pageSizeOptions={[8, 20, 50]}
-            pageSize={pageSize}
-            onPageSizeChange={(newPageSize: React.SetStateAction<number>) => setPageSize(newPageSize)}
-            pagination
-            disableRowSelectionOnClick
-            autoHeight
-            sx={{
-              "& .MuiDataGrid-root": { backgroundColor: "#fff", borderRadius: "8px" },
-              "& .MuiDataGrid-columnHeaders": { backgroundColor: "#f5f5f5" },
-              "& .MuiDataGrid-cell": { fontSize: isMobile ? "12px" : "14px" },
-              "& .MuiDataGrid-footerContainer": { backgroundColor: "#f5f5f5" },
-            }}
-          />
-        </div>
+        <TableContainer component={Paper} sx={{ borderRadius: "8px" }}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+                <TableCell>ID</TableCell>
+                <TableCell>Name</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell>Role</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {users.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>{user.id}</TableCell>
+                  <TableCell>{user.name}</TableCell>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.role}</TableCell>
+                  <TableCell>
+                    <Button variant="contained" color="primary" size="small" startIcon={<Edit />} onClick={() => handleOpenEditDialog(user)}>
+                      Edit
+                    </Button>
+                    <Button variant="contained" color="secondary" size="small" onClick={() => onDelete(user.id)}>
+                      Delete
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </section>
     </>
   );

@@ -45,12 +45,12 @@ const useMenu = () => {
       title: 'Team Managment',
       icon: <PeopleIcon />,
       submenus: [
-        {
-          key: '6.1',
-          route: '/users/dashboard',
-          title: 'Dashboard',
-          icon: <Dashboard />,
-        },
+        // {
+        //   key: '6.1',
+        //   route: '/users/dashboard',
+        //   title: 'Dashboard',
+        //   icon: <Dashboard />,
+        // },
 
         {
           key: '6.2',
@@ -92,12 +92,12 @@ const useMenu = () => {
           title: 'View Orderss',
           icon: <ReceiptLongIcon /> ,
         },
-        {
-          key: '8.3',
-          route: '/orders/create-orders',
-          title: 'Create Orders',
-          icon: <NoteAddIcon /> ,
-        },
+        // {
+        //   key: '8.3',
+        //   route: '/orders/create-orders',
+        //   title: 'Create Orders',
+        //   icon: <NoteAddIcon /> ,
+        // },
       ],
     },
   ]

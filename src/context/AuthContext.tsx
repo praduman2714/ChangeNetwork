@@ -7,6 +7,7 @@ interface AuthContextType {
   user: { email: string; role: string; token: string } | null;
   login: (userData: { email: string; role: string; token: string }) => void;
   logout: () => void;
+  authConfig: { headers: { Authorization?: string } };
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,8 +35,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     router.push("/signIn");
   };
 
+  // Generate the auth config
+  const authConfig = {
+    headers: {
+      Authorization: user?.token ? `Bearer ${user.token}` : undefined,
+    },
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, authConfig }}>
       {children}
     </AuthContext.Provider>
   );

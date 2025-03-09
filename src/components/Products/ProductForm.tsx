@@ -4,6 +4,7 @@ import * as Yup from "yup";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { TextField, Button, MenuItem, Typography, Box, Paper, Grid } from "@mui/material";
+import { useAuth } from "@/context/AuthContext";
 
 const categories = ["Electronics", "Fashion", "Home Appliances", "Books"];
 const brands = ["Apple", "Samsung", "Nike", "Sony"];
@@ -22,6 +23,8 @@ const validationSchema = Yup.object({
 });
 
 const ProductForm = () => {
+  const BASE_URL = process.env.NEXT_PUBLIC_URL;
+  const {authConfig} = useAuth();
   const formik = useFormik({
     initialValues: {
       name: "",
@@ -38,16 +41,17 @@ const ProductForm = () => {
     validationSchema,
     onSubmit: async (values, { resetForm }) => {
       try {
-        // const response = await axios.post("/api/products", values);
-        
-        // if (response.status === 200) {
+        const API_URL = `${BASE_URL}/api/products`
+        const response = await axios.post("/api/products", values, authConfig);
+        console.log(response);
+        if (response.status === 200) {
           Swal.fire({
             icon: "success",
             title: "Product Added!",
             text: "Your product has been successfully added.",
           });
           resetForm();
-        // }
+        }
       } catch (error) {
         Swal.fire({
           icon: "error",

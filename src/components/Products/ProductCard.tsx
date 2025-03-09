@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import React, { useState } from "react";
 import {
   Card,
@@ -11,9 +11,11 @@ import {
   DialogContent,
   DialogActions,
 } from "@mui/material";
+import OrderForm from "../Orders/OrderForm";
 
 interface ProductProps {
   product: {
+    id: string;
     name: string;
     totalQuantity: number;
     MRP: number;
@@ -28,7 +30,8 @@ interface ProductProps {
 }
 
 const ProductCard: React.FC<ProductProps> = ({ product }) => {
-  const [open, setOpen] = useState(false);
+  const [openDetails, setOpenDetails] = useState(false);
+  const [openOrder, setOpenOrder] = useState(false);
 
   return (
     <>
@@ -50,13 +53,13 @@ const ProductCard: React.FC<ProductProps> = ({ product }) => {
         </CardContent>
 
         <CardContent sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Button variant="contained" color="primary" onClick={() => setOpen(true)}>View Details</Button>
-          <Button variant="outlined" color="secondary">Place Order</Button>
+          <Button variant="contained" color="primary" onClick={() => setOpenDetails(true)}>View Details</Button>
+          <Button variant="outlined" color="secondary" onClick={() => setOpenOrder(true)}>Place Order</Button>
         </CardContent>
       </Card>
 
       {/* Dialog (Popup) for View Details */}
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
+      <Dialog open={openDetails} onClose={() => setOpenDetails(false)} fullWidth maxWidth="sm">
         <DialogTitle>{product.name}</DialogTitle>
         <DialogContent>
           <CardMedia component="img" height="250" image={product.image} alt={product.name} sx={{ borderRadius: 2, mb: 2 }} />
@@ -74,7 +77,18 @@ const ProductCard: React.FC<ProductProps> = ({ product }) => {
           <Typography variant="body1" sx={{ mt: 1 }}><strong>Stock:</strong> {product.totalQuantity}</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpen(false)} color="secondary">Close</Button>
+          <Button onClick={() => setOpenDetails(false)} color="secondary">Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog (Popup) for Order Form */}
+      <Dialog open={openOrder} onClose={() => setOpenOrder(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Place Order for {product.name}</DialogTitle>
+        <DialogContent>
+          <OrderForm productId={product.id} productName={product.name} onClose={() => setOpenOrder(false)} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenOrder(false)} color="secondary">Cancel</Button>
         </DialogActions>
       </Dialog>
     </>
