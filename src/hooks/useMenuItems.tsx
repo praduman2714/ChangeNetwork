@@ -17,6 +17,8 @@ import {
   Rule,
   SupportAgent
 } from '@mui/icons-material';
+import PeopleIcon from '@mui/icons-material/People';
+import PostAddIcon from '@mui/icons-material/PostAdd';
 import CreditCardIcon from "@mui/icons-material/CreditCard";
 import MoneyIcon from '@mui/icons-material/Money';
 import NoteIcon from "@mui/icons-material/Note";
@@ -36,87 +38,40 @@ export default () => {
     },
     {
       key: '6',
-      title: 'Invoice',
-      icon: '',
+      title: 'Team Managment',
+      icon: <PeopleIcon />,
       submenus: [
         {
           key: '6.1',
-          route: '/invoice/dashboard',
+          route: '/users/dashboard',
           title: 'Dashboard',
           icon: <Dashboard />,
         },
+
         {
           key: '6.2',
-          // route: '/invoice',
-          title: 'View Invoices',
-          // icon: ,
-          subSubMenus: [
-            {
-              key: '6.2.1',
-              route: '/invoice',
-              title: 'View Commercial Invoice',
-              // icon: ,
-            },
-            {
-              key: '6.2.2',
-              // route: '/invoice/createInvoice?type=PROFORMA_INVOICE',
-              route: '/invoice/view-all-proforma-invoice',
-              title: 'View Proforma Invoice',
-              // icon: ,
-            },
-          ]
-        },
-        {
-          key: '6.3',
-          // route: '/invoice/createInvoice',
-          title: 'Create Invoice',
-          // icon: ,
-          subSubMenus: [
-            {
-              key: '6.3.1',
-              route: '/invoice/createInvoice?type=COMMERCIAL_INVOICE',
-              title: 'Commercial Invoice',
-              // icon: ,
-            },
-            {
-              key: '6.3.2',
-              // route: '/invoice/createInvoice?type=PROFORMA_INVOICE',
-              route: '/invoice/create-proforma-invoice',
-              title: 'Proforma Invoice',
-              // icon: ,
-            },
-          ]
+          route: '/users',
+          title: 'View Team Members',
+          icon: <PeopleIcon /> ,
         },
       ],
     },
     {
       key: '7',
-      title: 'Bill Of Lading',
+      title: 'Products',
       icon: <CreditCardIcon />,
       submenus: [
         {
           key: '7.1',
-          route: '/bol/dashboard',
+          route: '/products',
           title: 'Dashboard',
           icon: <Dashboard />,
         },
         {
           key: '7.2',
-          route: '/bol',
-          title: 'View BOLs',
-          // icon: <RiBillFill size={25} />,
-        },
-        {
-          key: '7.3',
-          route: '/bol/incomingBol',
-          title: 'Incoming BOLs',
-          // icon: <RiBillFill size={25} />,
-        },
-        {
-          key: '7.4',
-          route: '/bol/createBol',
-          title: 'Create BOL',
-          // icon: ,
+          route: '/products/create-product',
+          title: 'Create Product',
+          icon: <PostAddIcon/>,
         },
       ],
     },
