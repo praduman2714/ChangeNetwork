@@ -23,6 +23,8 @@ import CreditCardIcon from "@mui/icons-material/CreditCard";
 import MoneyIcon from '@mui/icons-material/Money';
 import NoteIcon from "@mui/icons-material/Note";
 import PersonIcon from "@mui/icons-material/Person";
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import NoteAddIcon from '@mui/icons-material/NoteAdd';
 
 export default () => {
   const userRole = typeof window !== 'undefined' ? localStorage.getItem('role') : null;
@@ -78,26 +80,21 @@ export default () => {
     
     {
       key: '8',
-      title: 'Promissory Note',
+      title: 'Orders',
       icon: <NoteIcon />,
       submenus: [
-        {
-          key: '8.1',
-          route: '/promissory-note/dashboard',
-          title: 'Dashboard',
-          icon: <Dashboard />,
-        },
+        
         {
           key: '8.2',
-          route: '/promissory-note',
-          title: 'View promissory notes',
-          // icon: ,
+          route: '/orders',
+          title: 'View Orderss',
+          icon: <ReceiptLongIcon /> ,
         },
         {
           key: '8.3',
-          route: '/promissory-note/create-pNote',
-          title: 'Create p-Note',
-          // icon: ,
+          route: '/orders/create-orders',
+          title: 'Create Orders',
+          icon: <NoteAddIcon /> ,
         },
       ],
     },
