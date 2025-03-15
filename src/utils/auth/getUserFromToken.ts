@@ -4,13 +4,14 @@ import { NextRequest } from "next/server";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
-export async function getUserFromToken(req: Request) {
+export async function getUserFromToken(req: NextRequest) {
   try {
     // ✅ Extract the Authorization header
     const authHeader = req.headers.get("Authorization");
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return null; // No token provided
+      console.error("❌ No or invalid Authorization header provided");
+      return null;
     }
 
     // ✅ Get the token from the header
@@ -19,21 +20,27 @@ export async function getUserFromToken(req: Request) {
     // ✅ Verify the token
     const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string };
 
-    if (!decoded || !decoded.userId) {
-      return null; // Invalid token
+    if (!decoded?.userId) {
+      console.error("❌ Invalid token payload");
+      return null;
     }
 
     // ✅ Fetch the user from the database
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
       include: {
-        userDetails: true, // Fetch user details (optional)
+        details: true, // Fetch additional user details if needed
       },
     });
 
-    return user || null; // Return user or null if not found
-  } catch (error) {
-    console.error("❌ Token Verification Error:", error);
-    return null; // Token is invalid or expired
+    if (!user) {
+      console.error("❌ User not found for token");
+      return null;
+    }
+
+    return user;
+  } catch (error: any) {
+    console.error("❌ Token Verification Error:", error.message);
+    return null; // Return null if token is invalid or expired
   }
 }

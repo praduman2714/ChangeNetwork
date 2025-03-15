@@ -10,7 +10,7 @@ const noteSchema = z.object({
   subject: z.string().min(1, "Subject is required"),
 });
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     // ✅ Parse request body
     const body = await req.json();
@@ -28,11 +28,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized. Please log in." }, { status: 401 });
     }
 
-    // ✅ Ensure user has selected this subject
-    if (!user.subjects.includes(subject)) {
-      return NextResponse.json({ error: `Invalid subject: '${subject}'. Please select a valid subject.` }, { status: 400 });
-    }
-
+    // // ✅ Ensure user has selected this subject
+    // if (!user.subjects.includes(subject)) {
+    //   return NextResponse.json({ error: `Invalid subject: '${subject}'. Please select a valid subject.` }, { status: 400 });
+    // }
+    const email = "johndoe@example1.com";
+    const users = await prisma.user.findUnique({
+      where: { email },
+      include: {
+        details: true, // Include user details in the response
+      },
+    });
+    
     // ✅ Create the note
     const note = await prisma.note.create({
       data: {
