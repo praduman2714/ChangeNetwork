@@ -3,7 +3,7 @@ import Link from "next/link";
 
 
 
-const Breadcrumbs = ({ links }) => {
+const Breadcrumbs = ({ links }: any) => {
   return (
     <div className="py-2 flex md:gap-4 gap-1 items-center tracking-wide flex-wrap">
       <Link href="/">
@@ -11,7 +11,7 @@ const Breadcrumbs = ({ links }) => {
           <Home className="!text-theme" fontSize="small" /> Home
         </span>
       </Link>
-      {links?.map((item) => (
+      {links?.map((item: any) => (
         <div key={item?.id} className="flex md:gap-4 gap-1 items-center">
           <span className='text-black'>/</span>
           <Link href={item?.link}>
