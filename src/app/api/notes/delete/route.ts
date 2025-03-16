@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../../lib/prisma";
 import { getUserFromToken } from "@/utils/auth/getUserFromToken";
 
-export async function GET(req: NextRequest) {
+export async function DELETE(req: NextRequest) {
   try {
     const user = await getUserFromToken(req);
     if (!user) {
@@ -10,16 +10,13 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
-
     const id = searchParams.get("id");
-    console.log('id', id)
 
-    // ✅ Validate note ID format
     if (!id) {
       return NextResponse.json({ error: "Note ID is required" }, { status: 400 });
     }
-    console.log("id" , id);
-    // ✅ Fetch the note
+
+    // ✅ Check if the note exists
     const note = await prisma.note.findUnique({ where: { id } });
 
     if (!note) {
@@ -31,9 +28,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    return NextResponse.json({ note }, { status: 200 });
+    // ✅ Delete the note
+    await prisma.note.delete({ where: { id } });
+
+    return NextResponse.json({ message: "Note deleted successfully" }, { status: 200 });
+
   } catch (error) {
-    console.error("❌ Error fetching note:", error);
+    console.error("❌ Error deleting note:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
