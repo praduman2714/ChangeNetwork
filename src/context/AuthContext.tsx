@@ -3,31 +3,75 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
-interface AuthContextType {
-  user: { email: string; role: string; token: string } | null;
-  login: (userData: { email: string; role: string; token: string }) => void;
-  logout: () => void;
-  authConfig: { headers: { Authorization?: string } };
-  loading: boolean
+// 🔹 User Details Type
+interface UserDetailsType {
+  id: string;
+  userId: string;
+  bio?: string;
+  website?: string;
+  subjects: string[];
+  age?: string;
+  phone?: string;
+  address?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
+// 🔹 User Type
+export interface UserType {
+  id: string;
+  name: string;
+  email: string;
+  token: string;
+  userDetails: UserDetailsType;
+}
+
+// 🔹 Auth Context Type
+interface AuthContextType {
+  user: UserType | null;
+  login: (userData: UserType) => void;
+  logout: () => void;
+  authConfig: { headers: { Authorization?: string } };
+  loading: boolean;
+  subjects: string[]
+}
+
+// 🔹 Create Context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<{ email: string; role: string; token: string } | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [subjects, setSubjects] = useState<string[]>([]);
   const router = useRouter();
 
   useEffect(() => {
-    // setLoading(true);
     const storedUser = localStorage.getItem("user");
+
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        setUser(JSON.parse(storedUser) as UserType);
+
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+        localStorage.removeItem("user");
+      }
     }
     setLoading(false);
   }, []);
 
-  const login = (userData: { email: string; role: string; token: string }) => {
+  useEffect(() => {
+    if (user) {
+      try {
+        setSubjects(user?.userDetails?.subjects);
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
+    }
+    setLoading(false);
+  }, [user]);
+
+  const login = (userData: UserType) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
     router.push("/");
@@ -39,7 +83,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     router.push("/signIn");
   };
 
-  // Generate the auth config
   const authConfig = {
     headers: {
       Authorization: user?.token ? `Bearer ${user.token}` : undefined,
@@ -47,14 +90,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, authConfig, loading }}>
-      {children}
+    <AuthContext.Provider value={{ user, login, logout, authConfig, loading, subjects }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
 
-// Custom hook to access AuthContext
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
