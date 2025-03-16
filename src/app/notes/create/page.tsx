@@ -1,27 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation"; 
 import axios from "axios";
-import { toast } from "react-toastify";
-import RichTextEditor from "@/components/RichTextEditor"; // ✅ Import the fixed component
 import Swal from "sweetalert2";
 import { useAuth } from "@/context/AuthContext";
 import MainLayout from "@/layouts/admin";
 import Breadcrumbs from "@/core/Breadcrum";
+import RichTextEditor from "@/components/RichTextEditor"; 
 
 const CreateNote = () => {
   const searchParams = useSearchParams();
-  const subject = searchParams.get("subject");
+  const router = useRouter(); // ✅ Initialize router
+  const subject = searchParams.get("subject") ?? '';
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState(""); // ✅ Ensure state is updated
   const [loading, setLoading] = useState(false);
   const { authConfig } = useAuth();
 
-  const links = [
-    { id: 1, page: "Dashboard", link: "/notes" },
-  ];
+  const links = [{ id: 1, page: "Dashboard", link: "/notes" }];
 
   const handleSubmit = async () => {
     if (!title || !content) {
@@ -39,7 +37,7 @@ const CreateNote = () => {
       const requestBody = {
         subject,
         title,
-        content,  // ✅ Correctly sending HTML content
+        content, // ✅ Sending correct HTML content
       };
 
       console.log("Request Body:", requestBody);
@@ -50,6 +48,9 @@ const CreateNote = () => {
         icon: "success",
         title: "Success!",
         text: "Note created successfully!",
+        confirmButtonText: "OK", // ✅ Button text
+      }).then(() => {
+        router.push(`/notes/allNotes?subject=${encodeURIComponent(subject)}`); // ✅ Redirect after success
       });
 
       setTitle("");

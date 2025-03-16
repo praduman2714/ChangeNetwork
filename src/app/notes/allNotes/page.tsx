@@ -6,10 +6,11 @@ import axios from "axios";
 import MainLayout from "@/layouts/admin";
 import Breadcrumbs from "@/core/Breadcrum";
 import { useAuth } from "@/context/AuthContext";
-import { 
-  Container, Card, CardContent, Typography, Button, Grid, Box, CircularProgress 
+import {
+  Container, Card, CardContent, Typography, Button, Grid, Box, CircularProgress
 } from "@mui/material";
 import NoteDetails from "@/components/NoteDetails";
+import Swal from "sweetalert2";
 
 const AllNotes = () => {
   const searchParams = useSearchParams();
@@ -38,6 +39,51 @@ const AllNotes = () => {
     fetchNotes();
   }, [subject]);
 
+  const handleDelete = async (note: any) => {
+    console.log("in the delt", note);
+    if (!note) return;
+
+    const confirmDelete = await Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    });
+
+    if (!confirmDelete.isConfirmed) return;
+
+    try {
+      await axios.delete(`/api/notes/delete?id=${note}`, authConfig);
+      Swal.fire({
+        icon: "success",
+        title: "Deleted!",
+        text: "Your note has been deleted successfully.",
+        confirmButtonColor: "#3085d6",
+        timer: 2000, // ✅ Auto-close after 2 seconds
+        timerProgressBar: true,
+      }).then(() => {
+        window.location.reload(); // ✅ Reload page after Swal closes
+      });
+
+      // onClose();
+    } catch (error) {
+      console.error("Error deleting note:", error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Oops!",
+        text: "Something went wrong while deleting the note. Please try again.",
+        confirmButtonColor: "#d33",
+        timer: 2500,
+        timerProgressBar: true,
+      });
+    }
+  };
+
   return (
     <MainLayout title={`Notes for ${subject || "All Subjects"}`}>
       <Container maxWidth="lg">
@@ -56,27 +102,27 @@ const AllNotes = () => {
           <Grid container spacing={4} justifyContent="center">
             {notes.map((note: any) => (
               <Grid item xs={12} sm={6} md={4} key={note.id}>
-                <Card 
-                  sx={{ 
-                    display: "flex", 
-                    flexDirection: "column", 
+                <Card
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
                     justifyContent: "space-between",
                     height: "100%",
                     borderRadius: 3,
-                    boxShadow: 4, 
+                    boxShadow: 4,
                     transition: "0.3s",
-                    "&:hover": { boxShadow: 8 } 
+                    "&:hover": { boxShadow: 8 }
                   }}
                 >
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Typography variant="h6" fontWeight="bold">{note.title}</Typography>
-                    <Typography 
-                      variant="body2" 
-                      color="text.secondary" 
-                      dangerouslySetInnerHTML={{ __html: note.content.substring(0, 100) + "..." }} 
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      dangerouslySetInnerHTML={{ __html: note.content.substring(0, 100) + "..." }}
                     />
                   </CardContent>
-                  
+
                   {/* Buttons Section */}
                   <Box display="flex" justifyContent="space-between" p={2}>
                     <Button
@@ -90,9 +136,15 @@ const AllNotes = () => {
                     >
                       Read More
                     </Button>
-                    <Button variant="outlined" color="error" size="small">
+                    <Button
+                      onClick={() => handleDelete(note.id)}
+                      variant="outlined"
+                      color="error"
+                      size="small"
+                    >
                       Delete
                     </Button>
+
                   </Box>
                 </Card>
               </Grid>
