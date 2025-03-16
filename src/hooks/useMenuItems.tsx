@@ -20,7 +20,7 @@ const useMenu = () => {
       },
       {
         key: `${index + 1}.2`,
-        route: `/notes?subject=${encodeURIComponent(subject)}`, // Passing subject for filtering
+        route: `/notes/allNotes?subject=${encodeURIComponent(subject)}`, // Passing subject for filtering
         title: 'View Notes',
         icon: <NoteIcon />,
       },
